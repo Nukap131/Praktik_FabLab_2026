@@ -1,0 +1,3 @@
+Total krydsninger om dagen: 6
+Total krydsninger med timestamp kommer her i fremtidige versioner
+Og database kommer måske i fremtiden
