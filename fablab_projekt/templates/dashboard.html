@@ -1,0 +1,107 @@
+!DOCTYPE html>
+<html>
+<head>
+    <title>Fablab Person Tæller</title>
+    <meta charset="utf-8">
+    <style>
+        body { font-family: Arial; margin: 40px; background: #1a1a1a; color: white; }
+        .stats { display: flex; gap: 20px; }
+        .stat { background: #333; padding: 20px; border-radius: 10px; text-align: center; }
+        .big { font-size: 3em; color: #00ff88; }
+        table { width: 100%; border-collapse: collapse; margin-top: 30px; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #444; }
+        th { background: #333; }
+        .arrow { font-size: 1.5em; }
+        .download-btn { 
+            background: #00ff88; color: black; padding: 10px 20px; 
+            text-decoration: none; border-radius: 5px; margin: 5px;
+            font-weight: bold;
+        }
+        .download-btn:hover { background: #00cc70; }
+    </style>
+</head>
+<body>
+<h1>🏭 FABLAB PERSON TÆLLER</h1>
+
+<div class="stats">
+    <div class="stat">
+        <div class="big total">{{ total }}</div>
+        <div>Total ind</div>
+    </div>
+    <div class="stat">
+        <div class="big">{{ today }}</div>
+        <div>I dag</div>
+    </div>
+</div>
+
+<h2>Seneste passager</h2>
+<table>
+    <thead><tr><th>Tid</th><th>ID</th><th>Retning</th><th>Total</th></tr></thead>
+    <tbody>
+    {% for event in events %}
+        <tr>
+            <td>{{ event[0] }}</td>
+            <td>{{ event[1] }}</td>
+            <td><span class="arrow">{{ event[2] }}</span></td>
+            <td>{{ event[3] }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+<h3>💾 Download data</h3>
+<p>
+    <a href="/download/csv" class="download-btn">📥 Download CSV</a>
+    <a href="/download/json" class="download-btn">📥 Download JSON</a>
+</p>
+
+<h2>📊 Besøgende per dag</h2>
+<canvas id="dailyChart" width="600" height="200"></canvas>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const ctx = document.getElementById('dailyChart').getContext('2d');
+const dailyCounts = {{ daily_counts|tojson }};
+const dailyLabels = dailyCounts.map(e => e[0]);
+const dailyData = dailyCounts.map(e => e[1]);
+
+const dailyChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+        labels: dailyLabels,
+        datasets: [{
+            label: 'Besøgende per dag',
+            data: dailyData,
+            backgroundColor: 'rgba(0,255,136,0.6)'
+        }]
+    },
+    options: {
+        scales: { y: { beginAtZero: true } }
+    }
+});
+
+// Live opdatering af tabel og total
+async function updateLive() {
+    const res = await fetch('/api');
+    const data = await res.json();
+
+    document.querySelector('.big.total').textContent = data.total;
+
+    const tbody = document.querySelector('table tbody');
+    tbody.innerHTML = '';
+    data.events.forEach(e => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${e.timestamp}</td><td>${e.track_id}</td><td>${e.direction}</td><td>${e.total}</td>`;
+        tbody.appendChild(tr);
+    });
+}
+
+setInterval(updateLive, 5000);  // hver 5 sek
+</script>
+
+<p><small>
+    <a href="/api" target="_blank">JSON API</a> | 
+    Database: fablab_people.db
+</small></p>
+</body>
+</html>
