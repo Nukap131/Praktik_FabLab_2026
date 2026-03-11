@@ -21,6 +21,7 @@
     </style>
 </head>
 <body>
+
 <h1>🏭 FABLAB PERSON TÆLLER</h1>
 
 <div class="stats">
@@ -29,14 +30,21 @@
         <div>Total ind</div>
     </div>
     <div class="stat">
-        <div class="big">{{ today }}</div>
+        <div class="big today">{{ today }}</div>
         <div>I dag</div>
     </div>
 </div>
 
 <h2>Seneste passager</h2>
 <table>
-    <thead><tr><th>Tid</th><th>ID</th><th>Retning</th><th>Total</th></tr></thead>
+    <thead>
+        <tr>
+            <th>Tid</th>
+            <th>ID</th>
+            <th>Retning</th>
+            <th>Total</th>
+        </tr>
+    </thead>
     <tbody>
     {% for event in events %}
         <tr>
@@ -59,8 +67,11 @@
 <canvas id="dailyChart" width="600" height="200"></canvas>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <script>
+
 const ctx = document.getElementById('dailyChart').getContext('2d');
+
 const dailyCounts = {{ daily_counts|tojson }};
 const dailyLabels = dailyCounts.map(e => e[0]);
 const dailyData = dailyCounts.map(e => e[1]);
@@ -80,28 +91,49 @@ const dailyChart = new Chart(ctx, {
     }
 });
 
-// Live opdatering af tabel og total
+
+// -------- LIVE UPDATE --------
+
 async function updateLive() {
+
     const res = await fetch('/api');
     const data = await res.json();
 
+    // Total
     document.querySelector('.big.total').textContent = data.total;
 
+    // Today
+    document.querySelector('.big.today').textContent = data.today;
+
+    // Table
     const tbody = document.querySelector('table tbody');
     tbody.innerHTML = '';
+
     data.events.forEach(e => {
+
         const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${e.timestamp}</td><td>${e.track_id}</td><td>${e.direction}</td><td>${e.total}</td>`;
+
+        tr.innerHTML =
+        `<td>${e.timestamp}</td>
+         <td>${e.track_id}</td>
+         <td class="arrow">${e.direction}</td>
+         <td>${e.total}</td>`;
+
         tbody.appendChild(tr);
+
     });
+
 }
 
-setInterval(updateLive, 5000);  // hver 5 sek
+// Opdater hver 5 sek
+setInterval(updateLive, 5000);
+
 </script>
 
 <p><small>
     <a href="/api" target="_blank">JSON API</a> | 
     Database: fablab_people.db
 </small></p>
+
 </body>
 </html>
