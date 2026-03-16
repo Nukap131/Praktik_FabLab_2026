@@ -1,1 +1,7 @@
-data here
+CREATE TABLE people (
+ id INTEGER PRIMARY KEY AUTOINCREMENT,
+ timestamp TEXT,
+ track_id INTEGER,
+ direction TEXT,
+ total INTEGER
+);
