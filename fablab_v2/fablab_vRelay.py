@@ -73,7 +73,7 @@ print("Camera ready")
 # ---------------- DOOR ZONES ----------------
 
 line_x = 320
-margin = 80
+margin = 40
 
 LEFT  = line_x - margin
 RIGHT = line_x + margin
@@ -88,7 +88,7 @@ current_inside = 0
 tracks = {}
 next_track_id = 1
 
-max_distance = 100
+max_distance = 160
 track_timeout = 2
 
 # ---------------- LOOP ----------------
@@ -115,7 +115,7 @@ try:
    if cls!=0:
     continue
 
-   if score<0.55:
+   if score<0.40:
     continue
 
    box=boxes[i]
@@ -243,7 +243,7 @@ try:
 
   tracks=clean_tracks
 
-  time.sleep(0.03)
+  time.sleep(0.01)
 
 except KeyboardInterrupt:
 
